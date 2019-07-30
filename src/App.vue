@@ -3,7 +3,7 @@
     <div class="todo-wrap">
       <Header :addTodo='addTodo'/>
       <List :todos='todos' :deleteTodo='deleteTodo' :updateTodo='updateTodo'/>
-      <Footer :todos='todos'/>
+      <Footer :todos='todos' :selectAll='selectAll' :deleteCompleted='deleteCompleted'/>
     </div>
   </div>
 </template>
@@ -17,11 +17,7 @@
   export default {
     data () {
       return {
-        todos: [
-          {id: 1, title: 'haha', complete: false},
-          {id: 2, title: 'haha1', complete: false},
-          {id: 3, title: 'haha2', complete: true}
-          ]
+        todos: JSON.parse(localStorage.getItem('todos_key') || '[]')
       }
     },
     methods: {
@@ -33,7 +29,23 @@
       },
       deleteTodo (index) {
         this.todos.splice(index, 1)
+      },
+      selectAll (value) {
+        this.todos.forEach(todo => todo.complete = value)
+      },
+      deleteCompleted () {
+       this.todos = this.todos.filter(todo => !todo.complete)
       }
+    },
+    watch: {
+        // 深度 watcher
+        todos: {
+          deep: true, // 深度监视: 内部发生任何变化都会回调
+          handler: function (value) {
+            // 保存todos
+            localStorage.setItem('todos_key', JSON.stringify(value))
+          }
+        }
     },
     components: {
       Header,
